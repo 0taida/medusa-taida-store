@@ -19,3 +19,18 @@ export const POST = async (
     })
     res.json({ brand: result })
 }
+
+//get brands with there linked products
+export const GET = async (
+    req: MedusaRequest,
+    res: MedusaResponse,
+) => {
+    const query = req.scope.resolve("query")
+
+    const { data: brands } = await query.graph({
+        entity: "brand",
+        fields: ['*', "products.*"],
+    })
+
+    res.json({ brands })
+}
