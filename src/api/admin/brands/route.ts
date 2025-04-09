@@ -27,10 +27,29 @@ export const GET = async (
 ) => {
     const query = req.scope.resolve("query")
 
-    const { data: brands } = await query.graph({
+    const {
+        data: brandsWithProducts,
+        metadata: { count, take, skip } = {}
+    } = await query.graph({
         entity: "brand",
-        fields: ['*', "products.*"],
+        ...req.queryConfig,
     })
 
-    res.json({ brands })
+    // Transform the response to include product counts only
+    const brands = brandsWithProducts.map(brand => {
+        // Extract only what we need from the brand
+        return {
+            id: brand.id,
+            name: brand.name,
+            product_count: brand.products?.length || 0,
+            // Exclude the products array completely
+        }
+    })
+
+    res.json({
+        brands,
+        count,
+        limit: take,
+        offset: skip
+    })
 }
